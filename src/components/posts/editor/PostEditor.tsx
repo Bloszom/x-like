@@ -21,7 +21,7 @@ export default function PostEditor() {
         italic: false,
       }),
       Placeholder.configure({
-        placeholder: "Wetin dey sup?",
+        placeholder: "What's crack-a-lackin'?",
       }),
     ],
   });
