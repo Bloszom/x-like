@@ -1,5 +1,7 @@
+
 import { validateRequest } from "@/auth";
 import prisma from "@/lib/prisma";
+import streamServerClient from "@/lib/stream";
 import { createUploadthing, FileRouter } from "uploadthing/next";
 import { UploadThingError, UTApi } from "uploadthing/server";
 
@@ -32,14 +34,46 @@ export const fileRouter = {
         `/a/${process.env.NEXT_PUBLIC_UPLOADTHING_APP_ID}/`,
       );
 
-      await prisma.user.update({
-        where: { id: metadata.user.id },
+      await Promise.all([
+        prisma.user.update({
+          where: { id: metadata.user.id },
+          data: {
+            avatarUrl: newAvatarUrl,
+          },
+        }),
+        streamServerClient.partialUpdateUser({
+          id: metadata.user.id,
+          set: {
+            image: newAvatarUrl,
+          },
+        }),
+      ]);
+
+      return { avatarUrl: newAvatarUrl };
+    }),
+  attachment: f({
+    image: { maxFileSize: "4MB", maxFileCount: 5 },
+    video: { maxFileSize: "64MB", maxFileCount: 5 },
+  })
+    .middleware(async () => {
+      const { user } = await validateRequest();
+
+      if (!user) throw new UploadThingError("Unauthorized");
+
+      return {};
+    })
+    .onUploadComplete(async ({ file }) => {
+      const media = await prisma.media.create({
         data: {
-          avatarUrl: newAvatarUrl,
+          url: file.url.replace(
+            "/f/",
+            `/a/${process.env.NEXT_PUBLIC_UPLOADTHING_APP_ID}/`,
+          ),
+          type: file.type.startsWith("image") ? "IMAGE" : "VIDEO",
         },
       });
 
-      return { avatarUrl: newAvatarUrl };
+      return { mediaId: media.id };
     }),
 } satisfies FileRouter;
 
