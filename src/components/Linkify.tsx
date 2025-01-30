@@ -1,9 +1,11 @@
 import Link from "next/link";
 import { LinkIt, LinkItUrl } from "react-linkify-it";
 import UserLinkWithTooltip from "./UserLinkWithTooltip";
+
 interface LinkifyProps {
   children: React.ReactNode;
 }
+
 export default function Linkify({ children }: LinkifyProps) {
   return (
     <LinkifyUsername>
@@ -13,11 +15,13 @@ export default function Linkify({ children }: LinkifyProps) {
     </LinkifyUsername>
   );
 }
+
 function LinkifyUrl({ children }: LinkifyProps) {
   return (
     <LinkItUrl className="text-primary hover:underline">{children}</LinkItUrl>
   );
 }
+
 function LinkifyUsername({ children }: LinkifyProps) {
   return (
     <LinkIt
@@ -32,6 +36,7 @@ function LinkifyUsername({ children }: LinkifyProps) {
     </LinkIt>
   );
 }
+
 function LinkifyHashtag({ children }: LinkifyProps) {
   return (
     <LinkIt
